@@ -51,7 +51,7 @@ def main():
         disk = ["◴", "◷", "◶", "◵"]
         for i in range(4):
             print(Fore.GREEN + f"\n{disk[i]}  {Fore.MAGENTA}Tocando: {Fore.YELLOW}{os.path.basename(music_files[index])}")
-            print(Style.DIM + "\n[Enter] Próxima  [a] Anterior  [q] Sair")
+            print(Style.DIM + "\n[n] Próxima  [a] Anterior  [q] Sair")
             time.sleep(0.2)
             os.system("clear")
 
@@ -64,7 +64,7 @@ def main():
             index = (index - 1) % len(music_files)
         elif cmd == "q":  # Sair
             break
-        elif cmd == "":  # Enter - Próxima
+        elif cmd == "n":  # Próxima (n)
             index = (index + 1) % len(music_files)
 
 if __name__ == "__main__":
