@@ -1,16 +1,18 @@
 import os
 import time
 import subprocess
-from pathlib import Path
 from colorama import init, Fore, Style
 import sys
 import termios
 import tty
 
+# Inicializando o Colorama
 init(autoreset=True)
 
+# Configuração da pasta de músicas
 MUSIC_DIR = "/storage/emulated/0/Music"
 
+# Função para listar arquivos MP3 na pasta
 def find_mp3_files():
     files = []
     for root, _, filenames in os.walk(MUSIC_DIR):
@@ -19,17 +21,19 @@ def find_mp3_files():
                 files.append(os.path.join(root, file))
     return sorted(files)
 
+# Função para formatar o tempo (minutos:segundos)
 def format_time(seconds):
     minutes = int(seconds // 60)
     sec = int(seconds % 60)
     return f"{minutes:02}:{sec:02}"
 
+# Função para tocar a música com mpv
 def play_music(file_path):
     print(Fore.CYAN + f"\nTocando: {Fore.YELLOW}{os.path.basename(file_path)}\n")
     subprocess.run(["mpv", "--no-video", "--force-window=no", "--ao=opensles", file_path])
 
+# Função para capturar entrada de uma tecla sem precisar pressionar Enter
 def get_input():
-    """ Função para capturar entrada sem esperar por 'enter' """
     fd = sys.stdin.fileno()
     old_settings = termios.tcgetattr(fd)
     try:
@@ -39,32 +43,35 @@ def get_input():
         termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
     return ch
 
+# Função principal do player
 def main():
-    music_files = find_mp3_files()
+    music_files = find_mp3_files()  # Carregar músicas MP3
     if not music_files:
         print(Fore.RED + "Nenhuma música encontrada em " + MUSIC_DIR)
         return
 
     index = 0
     while True:
-        os.system("clear")
-        disk = ["◴", "◷", "◶", "◵"]
+        os.system("clear")  # Limpa a tela
+        disk = ["◴", "◷", "◶", "◵"]  # Exemplo de "disco girando"
         for i in range(4):
             print(Fore.GREEN + f"\n{disk[i]}  {Fore.MAGENTA}Tocando: {Fore.YELLOW}{os.path.basename(music_files[index])}")
             print(Style.DIM + "\n[n] Próxima  [a] Anterior  [q] Sair")
-            time.sleep(0.2)
-            os.system("clear")
+            time.sleep(0.2)  # Simula o "disco girando"
+            os.system("clear")  # Limpa a tela
 
+        # Toca a música atual
         play_music(music_files[index])
 
-        # Captura a entrada sem precisar de enter
+        # Captura a entrada do usuário
         cmd = get_input()
 
+        # Lógica dos comandos
         if cmd == "a":  # Anterior
             index = (index - 1) % len(music_files)
         elif cmd == "q":  # Sair
             break
-        elif cmd == "n":  # Próxima (n)
+        elif cmd == "n":  # Próxima
             index = (index + 1) % len(music_files)
 
 if __name__ == "__main__":
