@@ -8,8 +8,18 @@ from colorama import Fore
 # Caminho correto para músicas no Android
 MUSIC_DIR = "/storage/emulated/0/Music"
 
-# Lista arquivos .mp3
-playlist = [f for f in os.listdir(MUSIC_DIR) if f.lower().endswith(".mp3")]
+# Função para buscar todas as músicas .mp3 nas subpastas
+def buscar_musicas(diretorio):
+    musicas = []
+    for root, dirs, files in os.walk(diretorio):
+        for file in files:
+            if file.lower().endswith(".mp3"):
+                musicas.append(os.path.join(root, file))
+    return musicas
+
+# Lista todas as músicas no diretório e subdiretórios
+playlist = buscar_musicas(MUSIC_DIR)
+
 if not playlist:
     print(Fore.RED + "Nenhuma música .mp3 encontrada em /storage/emulated/0/Music")
     sys.exit()
@@ -21,7 +31,7 @@ current_thread = None
 def tocar(musica):
     global is_playing
     print(Fore.CYAN + f"Tocando: {musica}")
-    playsound(os.path.join(MUSIC_DIR, musica))
+    playsound(musica)
     is_playing = False
 
 def tocar_em_thread():
@@ -46,3 +56,4 @@ while True:
         is_playing = False
         time.sleep(0.5)
         tocar_em_thread()
+        
