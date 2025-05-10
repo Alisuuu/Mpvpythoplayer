@@ -70,9 +70,15 @@ def main():
         if cmd == "a":  # Anterior
             index = (index - 1) % len(music_files)
         elif cmd == "q":  # Sair
+            print(Fore.RED + "Saindo do player...")
             break
         elif cmd == "n":  # Próxima
             index = (index + 1) % len(music_files)
+
+        # Verifica se tocou a última música
+        if index == len(music_files) - 1:  # Última música
+            print(Fore.YELLOW + "Última música tocada.")
+            break  # Encerra o player ao final da última música
 
 if __name__ == "__main__":
     main()
