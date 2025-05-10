@@ -3,74 +3,69 @@ import subprocess
 import sys
 import termios
 import tty
-from colorama import init, Fore, Style
+from colorama import Fore, Style, init
 
 init(autoreset=True)
 
 MUSIC_DIR = "/storage/emulated/0/Music"
 
-def find_mp3_files():
-    return sorted([
-        os.path.join(root, file)
-        for root, _, files in os.walk(MUSIC_DIR)
-        for file in files if file.endswith(".mp3")
-    ])
-
-def get_arrow_input():
-    fd = sys.stdin.fileno()
-    old_settings = termios.tcgetattr(fd)
-    try:
-        tty.setraw(fd)
-        ch1 = sys.stdin.read(1)
-        if ch1 == '\x1b':  # ESC
-            ch2 = sys.stdin.read(1)
-            if ch2 == '[':
-                ch3 = sys.stdin.read(1)
-                return ch3  # A=up, B=down, C=right, D=left
-        return ch1
-    finally:
-        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
-
-def play_music(path):
-    return subprocess.Popen(["mpv", "--no-video", "--ao=opensles", path],
-                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+def get_mp3_files():
+    mp3_files = []
+    for root, _, files in os.walk(MUSIC_DIR):
+        for f in files:
+            if f.endswith(".mp3"):
+                mp3_files.append(os.path.join(root, f))
+    return sorted(mp3_files)
 
 def show_playlist(playlist, current_index):
     os.system("clear")
-    print(Fore.MAGENTA + Style.BRIGHT + "== MP3 Player Hacker ==")
-    print(Fore.YELLOW + "Use ← (esquerda) / → (direita) para navegar, q para sair.\n")
-    for i, track in enumerate(playlist):
-        name = os.path.basename(track)
+    print(Fore.MAGENTA + Style.BRIGHT + "== MP3 PLAYER ==")
+    print(Fore.CYAN + "Controles: a = anterior | n = próxima | q = sair\n")
+    for i, song in enumerate(playlist):
+        name = os.path.basename(song)
         if i == current_index:
             print(Fore.GREEN + ">> " + name)
         else:
             print("   " + name)
 
+def get_key():
+    fd = sys.stdin.fileno()
+    old = termios.tcgetattr(fd)
+    try:
+        tty.setraw(fd)
+        return sys.stdin.read(1)
+    finally:
+        termios.tcsetattr(fd, termios.TCSADRAIN, old)
+
+def play_ffplay(file_path):
+    return subprocess.Popen(["ffplay", "-nodisp", "-autoexit", "-loglevel", "quiet", file_path])
+
 def main():
-    playlist = find_mp3_files()
+    playlist = get_mp3_files()
     if not playlist:
-        print("Nenhum arquivo MP3 encontrado.")
+        print("Nenhum .mp3 encontrado em", MUSIC_DIR)
         return
 
     index = 0
-    current_proc = None
+    process = None
 
     while True:
         show_playlist(playlist, index)
 
-        if current_proc and current_proc.poll() is None:
-            current_proc.terminate()
-        current_proc = play_music(playlist[index])
+        if process:
+            process.terminate()
 
-        while True:
-            key = get_arrow_input()
+        process = play_ffplay(playlist[index])
+
+        while process.poll() is None:
+            key = get_key()
             if key == 'q':
-                current_proc.terminate()
+                process.terminate()
                 return
-            elif key == 'C':  # seta para direita
+            elif key == 'n':
                 index = (index + 1) % len(playlist)
                 break
-            elif key == 'D':  # seta para esquerda
+            elif key == 'a':
                 index = (index - 1) % len(playlist)
                 break
 
