@@ -1,12 +1,12 @@
 import os
-import time
 import subprocess
-from colorama import init, Fore, Style
+import time
 import sys
 import termios
 import tty
+from colorama import init, Fore, Style
 
-# Inicializando o Colorama
+# Inicializa o Colorama
 init(autoreset=True)
 
 # Configuração da pasta de músicas
@@ -30,7 +30,7 @@ def format_time(seconds):
 # Função para tocar a música com mpv
 def play_music(file_path):
     print(Fore.CYAN + f"\nTocando: {Fore.YELLOW}{os.path.basename(file_path)}\n")
-    subprocess.run(["mpv", "--no-video", "--force-window=no", "--ao=opensles", file_path])
+    subprocess.Popen(["mpv", "--no-video", "--force-window=no", "--ao=opensles", file_path])
 
 # Função para capturar entrada de uma tecla sem precisar pressionar Enter
 def get_input():
@@ -53,13 +53,9 @@ def main():
     index = 0
     while True:
         os.system("clear")  # Limpa a tela
-        disk = ["◴", "◷", "◶", "◵"]  # Exemplo de "disco girando"
-        for i in range(4):
-            print(Fore.GREEN + f"\n{disk[i]}  {Fore.MAGENTA}Tocando: {Fore.YELLOW}{os.path.basename(music_files[index])}")
-            print(Style.DIM + "\n[n] Próxima  [a] Anterior  [q] Sair")
-            time.sleep(0.2)  # Simula o "disco girando"
-            os.system("clear")  # Limpa a tela
-
+        print(Fore.GREEN + f"\nTocando: {Fore.YELLOW}{os.path.basename(music_files[index])}")
+        print(Style.DIM + "\n[n] Próxima  [a] Anterior  [q] Sair")
+        
         # Toca a música atual
         play_music(music_files[index])
 
