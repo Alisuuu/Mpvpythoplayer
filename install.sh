@@ -1,17 +1,16 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
 # Atualizar e instalar dependências
-pkg update -y && pkg upgrade -y
-pkg install git nodejs -y
+pkg update -y && pkg upgrade -y && pkg install -y git python ffmpeg mpv curl
 
 # Clonar o repositório
-git clone https://github.com/SEU_USUARIO/seu-repositorio.git
+git clone https://github.com/Alisuuu/Mpvpythoplayer.git
 
-# Acessar a pasta do repositório
-cd seu-repositorio
+# Acessar o diretório do repositório
+cd Mpvpythoplayer
 
-# Instalar dependências do projeto
-npm install
+# Instalar as dependências do Python
+pip install -r requirements.txt
 
-# Rodar o player
-npm start
+# Executar o player
+python app.py
