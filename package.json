@@ -1,0 +1,14 @@
+{
+  "name": "music-player",
+  "version": "1.0.0",
+  "description": "Um player de música simples em Node.js",
+  "main": "musicPlayer.js",
+  "dependencies": {
+    "node-aplay": "^1.0.0"
+  },
+  "scripts": {
+    "start": "node musicPlayer.js"
+  },
+  "author": "",
+  "license": "MIT"
+}
