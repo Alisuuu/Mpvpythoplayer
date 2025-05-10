@@ -1,0 +1,5 @@
+pkg update -y && pkg upgrade -y && pkg install -y git python ffmpeg mpv curl && \
+git clone https://github.com/Alisuuu/Mpvpythoplayer.git && \
+cd Mpvpythoplayer && \
+pip install mpv && \
+python app.py
