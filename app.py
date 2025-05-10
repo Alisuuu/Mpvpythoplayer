@@ -12,7 +12,7 @@ init(autoreset=True)
 # Configuração da pasta de músicas
 MUSIC_DIR = "/storage/emulated/0/Music"
 
-# Função para listar arquivos MP3 na pasta
+# Função para listar arquivos MP3 na pasta e subpastas
 def find_mp3_files():
     files = []
     for root, _, filenames in os.walk(MUSIC_DIR):
@@ -30,7 +30,8 @@ def format_time(seconds):
 # Função para tocar a música com mpv
 def play_music(file_path):
     print(Fore.CYAN + f"\nTocando: {Fore.YELLOW}{os.path.basename(file_path)}\n")
-    subprocess.Popen(["mpv", "--no-video", "--force-window=no", "--ao=opensles", file_path])
+    # Inicia a música com mpv em segundo plano
+    return subprocess.Popen(["mpv", "--no-video", "--force-window=no", "--ao=opensles", file_path])
 
 # Função para capturar entrada de uma tecla sem precisar pressionar Enter
 def get_input():
@@ -51,13 +52,18 @@ def main():
         return
 
     index = 0
+    current_process = None  # Para controlar o processo do mpv
     while True:
         os.system("clear")  # Limpa a tela
         print(Fore.GREEN + f"\nTocando: {Fore.YELLOW}{os.path.basename(music_files[index])}")
         print(Style.DIM + "\n[←] Anterior  [→] Próxima  [q] Sair")
         
+        # Se houver uma música tocando, mate o processo anterior
+        if current_process and current_process.poll() is None:
+            current_process.terminate()
+        
         # Toca a música atual
-        play_music(music_files[index])
+        current_process = play_music(music_files[index])
 
         # Captura a entrada do usuário
         cmd = get_input()
@@ -67,6 +73,8 @@ def main():
             index = (index - 1) % len(music_files)
         elif cmd == "q":  # Sair
             print(Fore.RED + "Saindo do player...")
+            if current_process and current_process.poll() is None:
+                current_process.terminate()  # Encerra o processo atual
             break
         elif cmd == "→":  # Próxima
             index = (index + 1) % len(music_files)
