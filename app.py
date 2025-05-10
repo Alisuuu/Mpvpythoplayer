@@ -54,7 +54,7 @@ def main():
     while True:
         os.system("clear")  # Limpa a tela
         print(Fore.GREEN + f"\nTocando: {Fore.YELLOW}{os.path.basename(music_files[index])}")
-        print(Style.DIM + "\n[n] Próxima  [a] Anterior  [q] Sair")
+        print(Style.DIM + "\n[←] Anterior  [→] Próxima  [q] Sair")
         
         # Toca a música atual
         play_music(music_files[index])
@@ -63,12 +63,12 @@ def main():
         cmd = get_input()
 
         # Lógica dos comandos
-        if cmd == "a":  # Anterior
+        if cmd == "←":  # Anterior
             index = (index - 1) % len(music_files)
         elif cmd == "q":  # Sair
             print(Fore.RED + "Saindo do player...")
             break
-        elif cmd == "n":  # Próxima
+        elif cmd == "→":  # Próxima
             index = (index + 1) % len(music_files)
 
         # Verifica se tocou a última música
