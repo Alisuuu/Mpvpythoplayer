@@ -10,64 +10,69 @@ init(autoreset=True)
 MUSIC_DIR = "/storage/emulated/0/Music"
 
 def find_mp3_files():
-    files = []
-    for root, _, filenames in os.walk(MUSIC_DIR):
-        for file in filenames:
-            if file.endswith(".mp3"):
-                files.append(os.path.join(root, file))
-    return sorted(files)
+    return sorted([
+        os.path.join(root, file)
+        for root, _, files in os.walk(MUSIC_DIR)
+        for file in files if file.endswith(".mp3")
+    ])
 
-def get_input():
+def get_arrow_input():
     fd = sys.stdin.fileno()
     old_settings = termios.tcgetattr(fd)
     try:
         tty.setraw(fd)
-        return sys.stdin.read(1)
+        ch1 = sys.stdin.read(1)
+        if ch1 == '\x1b':  # ESC
+            ch2 = sys.stdin.read(1)
+            if ch2 == '[':
+                ch3 = sys.stdin.read(1)
+                return ch3  # A=up, B=down, C=right, D=left
+        return ch1
     finally:
         termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
 
-def play_music(file_path):
-    return subprocess.Popen(["mpv", "--no-video", "--force-window=no", "--ao=opensles", file_path],
+def play_music(path):
+    return subprocess.Popen(["mpv", "--no-video", "--ao=opensles", path],
                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-def show_playlist(music_files, current_index):
-    print(Fore.CYAN + "\nFaixas encontradas:\n")
-    for i, file in enumerate(music_files):
-        name = os.path.basename(file)
+def show_playlist(playlist, current_index):
+    os.system("clear")
+    print(Fore.MAGENTA + Style.BRIGHT + "== MP3 Player Hacker ==")
+    print(Fore.YELLOW + "Use ← (esquerda) / → (direita) para navegar, q para sair.\n")
+    for i, track in enumerate(playlist):
+        name = os.path.basename(track)
         if i == current_index:
             print(Fore.GREEN + ">> " + name)
         else:
             print("   " + name)
 
 def main():
-    music_files = find_mp3_files()
-    if not music_files:
-        print(Fore.RED + f"Nenhuma música encontrada em {MUSIC_DIR}")
+    playlist = find_mp3_files()
+    if not playlist:
+        print("Nenhum arquivo MP3 encontrado.")
         return
 
     index = 0
-    current_process = None
+    current_proc = None
 
     while True:
-        os.system("clear")
-        show_playlist(music_files, index)
-        print(Style.BRIGHT + "\nControles: [←] Anterior  [→] Próxima  [q] Sair\n")
+        show_playlist(playlist, index)
 
-        if current_process and current_process.poll() is None:
-            current_process.terminate()
+        if current_proc and current_proc.poll() is None:
+            current_proc.terminate()
+        current_proc = play_music(playlist[index])
 
-        current_process = play_music(music_files[index])
-
-        cmd = get_input()
-        if cmd == "q":
-            if current_process and current_process.poll() is None:
-                current_process.terminate()
-            print(Fore.YELLOW + "Saindo...")
-            break
-        elif cmd == "→":
-            index = (index + 1) % len(music_files)
-        elif cmd == "←":
-            index = (index - 1) % len(music_files)
+        while True:
+            key = get_arrow_input()
+            if key == 'q':
+                current_proc.terminate()
+                return
+            elif key == 'C':  # seta para direita
+                index = (index + 1) % len(playlist)
+                break
+            elif key == 'D':  # seta para esquerda
+                index = (index - 1) % len(playlist)
+                break
 
 if __name__ == "__main__":
     main()
