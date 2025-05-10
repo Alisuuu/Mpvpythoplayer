@@ -3,6 +3,9 @@ import time
 import subprocess
 from pathlib import Path
 from colorama import init, Fore, Style
+import sys
+import termios
+import tty
 
 init(autoreset=True)
 
@@ -25,6 +28,17 @@ def play_music(file_path):
     print(Fore.CYAN + f"\nTocando: {Fore.YELLOW}{os.path.basename(file_path)}\n")
     subprocess.run(["mpv", "--no-video", "--force-window=no", "--ao=opensles", file_path])
 
+def get_input():
+    """ Função para capturar entrada sem esperar por 'enter' """
+    fd = sys.stdin.fileno()
+    old_settings = termios.tcgetattr(fd)
+    try:
+        tty.setraw(fd)
+        ch = sys.stdin.read(1)
+    finally:
+        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+    return ch
+
 def main():
     music_files = find_mp3_files()
     if not music_files:
@@ -43,13 +57,14 @@ def main():
 
         play_music(music_files[index])
 
-        print(Style.DIM + "\nDigite uma opção:")
-        cmd = input("[Enter] próxima | [a] anterior | [q] sair: ").strip().lower()
-        if cmd == "a":
+        # Captura a entrada sem precisar de enter
+        cmd = get_input()
+
+        if cmd == "a":  # Anterior
             index = (index - 1) % len(music_files)
-        elif cmd == "q":
+        elif cmd == "q":  # Sair
             break
-        else:
+        elif cmd == "":  # Enter - Próxima
             index = (index + 1) % len(music_files)
 
 if __name__ == "__main__":
