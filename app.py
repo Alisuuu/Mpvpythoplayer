@@ -5,11 +5,13 @@ import time
 from playsound import playsound
 from colorama import Fore
 
-MUSIC_DIR = "/sdcard/Music"
+# Caminho correto para músicas no Android
+MUSIC_DIR = "/storage/emulated/0/Music"
 
+# Lista arquivos .mp3
 playlist = [f for f in os.listdir(MUSIC_DIR) if f.lower().endswith(".mp3")]
 if not playlist:
-    print(Fore.RED + "Nenhuma música .mp3 encontrada em /sdcard/Music")
+    print(Fore.RED + "Nenhuma música .mp3 encontrada em /storage/emulated/0/Music")
     sys.exit()
 
 index = 0
@@ -44,4 +46,3 @@ while True:
         is_playing = False
         time.sleep(0.5)
         tocar_em_thread()
-        
